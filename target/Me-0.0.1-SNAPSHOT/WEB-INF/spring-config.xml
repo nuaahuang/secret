@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:context="http://www.springframework.org/schema/context"  
+        xmlns:aop="http://www.springframework.org/schema/aop"  
+        xmlns:tx="http://www.springframework.org/schema/tx"  
+        xsi:schemaLocation="  
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd  
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+             http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-4.3.xsd ">  
+  
+  	<context:component-scan base-package="com.huang.spring">
+ 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+ 	</context:component-scan>
+ 	<context:annotation-config />  
+ 	<context:property-placeholder location="classpath:settings.properties"/>
+ 	
+ 	<!-- durid 数据库连接池配置 -->
+ 	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+ 		<property name="url" value="${druid.url}"/>
+ 		<property name="driverClassName" value="${druid.driverClassName}"/>
+ 		<property name="username" value="${druid.username}"/>
+ 		<property name="password" value="${druid.password"/>
+ 		
+ 		<property name="filters" value="${druid.filters}"/>
+ 		
+ 		<property name="maxActive" value="${druid.maxActive}"/>
+ 		<property name="initialSize" value="${druid.initialSize}"/>
+ 		<property name="maxWait" value="${druid.maxWait}"/>
+ 		<property name="minIdle" value="${druid.mindle}"/>
+ 		<property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+ 		<property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}" />
+ 		<property name="validationQuery" value="${druid.validationQuery}" />
+ 		<property name="testWhileIdle" value="${druid.testWhileIdle}"/>
+ 		<property name="testOnBorrow" value="${druid.testOnBorrow}"/>
+ 		<property name="testOnReturn" value="${druid.testOnReturn}"/>
+ 		<property name="maxOpenPreparedStatements" value="${druid.maxOpenPreparedStatements}"/>
+ 		<property name="removeAbandoned" value="${removeAbandoned}"/>
+ 		<property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}"/>  <!-- 1800秒，也就是30分钟 -->  
+ 		<property name="logAbandoned" value="${logAbandoned}"/> <!-- 废弃连接时输出错误日志 -->  
+ 	</bean>
+ 	
+
+    <!-- MySQL 数据源配置 -->
+	<bean id="dataSource_common" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://127.0.0.1:3306/spring"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="security"></property>
+	</bean>
+	
+	<!-- Session 工厂配置 -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource"><ref bean="dataSource"></ref></property>
+		<property name="hibernateProperties">
+		<props>
+			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+			<prop key="hibernate.hbm2ddl.auto">update</prop>
+		</props>
+	</property> 
+	</bean>
+      
+    <!-- 使用事务管理器将事务与Hibernate关联 -->  
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">  
+        <property name="sessionFactory">  
+            <ref local="sessionFactory"/>  
+        </property>  
+    </bean>  
+      
+    <!-- 事务（注解 ）-->  
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>  
+    
+    <!-- Freemarker配置 -->  
+	<bean id="freemarkerConfig"  
+	      class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">  
+	    <property name="templateLoaderPath" value="/WEB-INF/helloworld/" />  
+	    <property name="freemarkerSettings">  
+	        <props>  
+	            <prop key="template_update_delay">0</prop>  
+	            <prop key="default_encoding">UTF-8</prop>  
+	            <prop key="url_escaping_charset">UTF-8</prop>
+	            <prop key="output_encoding">UTF-8</prop>
+	            <prop key="boolean_format">true,false</prop>
+	            <prop key="date_format">yyyy-MM-dd</prop>
+	            <prop key="time_format">HH:mm:ss</prop>
+	            <prop key="number_format">0.##########</prop>  
+	            <prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop> 
+	            <prop key="whitespace_stripping">true</prop> 
+	            <prop key="classic_compatible">true</prop>  
+	            <prop key="template_exception_handler">ignore</prop>  
+	        </props>  
+	    </property>  
+	</bean>  
+</beans> 
